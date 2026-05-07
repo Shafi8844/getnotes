@@ -1,0 +1,44 @@
+#
+# Deploys the Azure Functions in /functions to a Function App.
+#
+# Setup (one-time):
+#   Create an Azure Function App (Linux, Node 20, Consumption plan is fine).
+#   In your GitHub repo:
+#     Add secret AZURE_FUNCTIONAPP_PUBLISH_PROFILE (download from Function App > Get publish profile)
+#   Update AZURE_FUNCTIONAPP_NAME below.
+#
+name: Deploy Azure Functions
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'functions/**'
+      - '.github/workflows/azure-functions-deploy.yml'
+  workflow_dispatch:
+
+env:
+  AZURE_FUNCTIONAPP_NAME: getnotes-fn      # <-- change to your Function App name
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'functions'
+  NODE_VERSION: '20.x'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+        run: npm ci --omit=dev
+
+      - name: Deploy to Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}

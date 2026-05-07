@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 720" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <linearGradient id="azure" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#0078d4"/>
+      <stop offset="1" stop-color="#005a9e"/>
+    </linearGradient>
+    <linearGradient id="lightBox" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f1f5f9"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="550" y="36" text-anchor="middle" font-size="24" font-weight="700" fill="#0f172a">GetNotes — Cloud-Native Architecture</text>
+  <text x="550" y="58" text-anchor="middle" font-size="13" fill="#64748b">COM682 CW2 · MD Shafi Newaj Khan · B00974714</text>
+
+  <!-- Outer Azure boundary -->
+  <rect x="40" y="90" width="1020" height="600" rx="14" fill="none" stroke="#0078d4" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="60" y="115" font-size="13" font-weight="600" fill="#0078d4">Microsoft Azure · Resource Group: getnotes-rg</text>
+
+  <!-- USERS -->
+  <rect x="430" y="130" width="240" height="60" rx="8" fill="#f1f5f9" stroke="#cbd5e1"/>
+  <text x="550" y="155" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">Users · Browser</text>
+  <text x="550" y="175" text-anchor="middle" font-size="11" fill="#64748b">HTTPS</text>
+
+  <!-- Arrow users -> App Service -->
+  <line x1="550" y1="190" x2="550" y2="220" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- App Service -->
+  <rect x="280" y="225" width="540" height="120" rx="10" fill="url(#azure)" stroke="none"/>
+  <text x="550" y="252" text-anchor="middle" font-size="16" font-weight="700" fill="white">Azure App Service · Linux · Node 20</text>
+  <text x="550" y="272" text-anchor="middle" font-size="12" fill="#bae6fd">getnotes-web.azurewebsites.net</text>
+
+  <rect x="305" y="288" width="230" height="42" rx="6" fill="white" opacity="0.92"/>
+  <text x="420" y="306" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Frontend (static)</text>
+  <text x="420" y="322" text-anchor="middle" font-size="11" fill="#475569">/public · HTML, CSS, JS</text>
+
+  <rect x="565" y="288" width="230" height="42" rx="6" fill="white" opacity="0.92"/>
+  <text x="680" y="306" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">REST API</text>
+  <text x="680" y="322" text-anchor="middle" font-size="11" fill="#475569">/api/resources · /interactions · /users</text>
+
+  <!-- GitHub CI/CD on the left -->
+  <rect x="60" y="240" width="180" height="90" rx="10" fill="url(#lightBox)" stroke="#cbd5e1"/>
+  <text x="150" y="265" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">GitHub Actions</text>
+  <text x="150" y="284" text-anchor="middle" font-size="11" fill="#475569">Build · Smoke check</text>
+  <text x="150" y="300" text-anchor="middle" font-size="11" fill="#475569">Zip-deploy</text>
+  <text x="150" y="320" text-anchor="middle" font-size="11" font-weight="600" fill="#0078d4">CI/CD on push to main</text>
+  <line x1="240" y1="285" x2="280" y2="285" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Three downstream Azure resources -->
+  <!-- Cosmos DB -->
+  <rect x="80" y="410" width="280" height="160" rx="10" fill="url(#azure)" stroke="none"/>
+  <text x="220" y="438" text-anchor="middle" font-size="15" font-weight="700" fill="white">Azure Cosmos DB · NoSQL</text>
+  <text x="220" y="456" text-anchor="middle" font-size="11" fill="#bae6fd">Database: getnotes</text>
+  <rect x="100" y="470" width="240" height="26" rx="4" fill="white" opacity="0.92"/>
+  <text x="220" y="488" text-anchor="middle" font-size="11" fill="#0f172a">resources  ·  PK: /module</text>
+  <rect x="100" y="500" width="240" height="26" rx="4" fill="white" opacity="0.92"/>
+  <text x="220" y="518" text-anchor="middle" font-size="11" fill="#0f172a">interactions  ·  PK: /resourceId</text>
+  <rect x="100" y="530" width="240" height="26" rx="4" fill="white" opacity="0.92"/>
+  <text x="220" y="548" text-anchor="middle" font-size="11" fill="#0f172a">users  ·  PK: /id</text>
+
+  <!-- Blob Storage -->
+  <rect x="410" y="410" width="280" height="160" rx="10" fill="url(#azure)" stroke="none"/>
+  <text x="550" y="438" text-anchor="middle" font-size="15" font-weight="700" fill="white">Azure Blob Storage</text>
+  <text x="550" y="456" text-anchor="middle" font-size="11" fill="#bae6fd">Storage account</text>
+  <rect x="430" y="470" width="240" height="36" rx="4" fill="white" opacity="0.92"/>
+  <text x="550" y="492" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">resources/</text>
+  <text x="550" y="500" text-anchor="middle" font-size="10" fill="#475569"></text>
+  <rect x="430" y="514" width="240" height="36" rx="4" fill="white" opacity="0.92"/>
+  <text x="550" y="536" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">thumbnails/</text>
+
+  <!-- App Insights -->
+  <rect x="740" y="410" width="280" height="160" rx="10" fill="url(#azure)" stroke="none"/>
+  <text x="880" y="438" text-anchor="middle" font-size="15" font-weight="700" fill="white">Application Insights</text>
+  <text x="880" y="456" text-anchor="middle" font-size="11" fill="#bae6fd">Workspace-based</text>
+  <rect x="760" y="470" width="240" height="26" rx="4" fill="white" opacity="0.92"/>
+  <text x="880" y="488" text-anchor="middle" font-size="11" fill="#0f172a">Auto-instrumentation</text>
+  <rect x="760" y="500" width="240" height="26" rx="4" fill="white" opacity="0.92"/>
+  <text x="880" y="518" text-anchor="middle" font-size="11" fill="#0f172a">Custom events · Exceptions</text>
+  <rect x="760" y="530" width="240" height="26" rx="4" fill="white" opacity="0.92"/>
+  <text x="880" y="548" text-anchor="middle" font-size="11" fill="#0f172a">Live Metrics</text>
+
+  <!-- Connections from App Service to the three -->
+  <line x1="380" y1="345" x2="220" y2="410" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="278" y="380" font-size="11" fill="#475569">SDK</text>
+
+  <line x1="550" y1="345" x2="550" y2="410" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="560" y="380" font-size="11" fill="#475569">SDK</text>
+
+  <line x1="720" y1="345" x2="880" y2="410" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="810" y="380" font-size="11" fill="#475569">telemetry</text>
+
+  <!-- Azure Functions -->
+  <rect x="410" y="610" width="280" height="60" rx="10" fill="#16a34a" stroke="none"/>
+  <text x="550" y="635" text-anchor="middle" font-size="14" font-weight="700" fill="white">Azure Functions · Node 20</text>
+  <text x="550" y="654" text-anchor="middle" font-size="11" fill="#dcfce7">Blob trigger → thumbnail generator</text>
+
+  <!-- Arrow Blob to Functions -->
+  <line x1="550" y1="570" x2="550" y2="610" stroke="#16a34a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="560" y="595" font-size="11" fill="#16a34a">on upload</text>
+
+  <!-- Functions writes back to Blob -->
+  <path d="M 410 640 Q 320 600 410 565" fill="none" stroke="#16a34a" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <text x="320" y="610" font-size="11" fill="#16a34a">writes thumb</text>
+
+  <!-- Legend -->
+  <rect x="60" y="640" width="14" height="14" fill="url(#azure)"/>
+  <text x="80" y="652" font-size="11" fill="#475569">Azure managed service</text>
+  <rect x="220" y="640" width="14" height="14" fill="#16a34a"/>
+  <text x="240" y="652" font-size="11" fill="#475569">Serverless</text>
+</svg>

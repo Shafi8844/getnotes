@@ -1,0 +1,29 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+.DS_Store
+.vscode/
+.idea/
+dist/
+build/
+coverage/
+.nyc_output/
+
+# Functions
+functions/local.settings.json
+functions/node_modules/
+functions/bin/
+functions/obj/
+
+# Azure
+.azure/
+*.PublishSettings
+*.publishsettings
+
+# Misc
+*.swp
+*.swo
+*~

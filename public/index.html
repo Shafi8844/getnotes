@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GetNotes — Cloud-Native Academic Resource Sharing</title>
+<link rel="stylesheet" href="/css/styles.css" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📘%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+
+<!-- ============== HEADER ============== -->
+<header class="topbar">
+    <div class="container topbar-inner">
+        <a href="#" class="brand" data-route="home">
+            <span class="brand-mark">📘</span>
+            <span class="brand-name">GetNotes</span>
+        </a>
+        <nav class="nav">
+            <a href="#" data-route="home" class="nav-link active">Browse</a>
+            <a href="#" data-route="trending" class="nav-link">Trending</a>
+            <a href="#" data-route="upload" class="nav-link">Upload</a>
+        </nav>
+    </div>
+</header>
+
+<!-- ============== HERO ============== -->
+<section class="hero" id="hero">
+    <div class="container hero-inner">
+        <h1>Share academic resources, the cloud-native way.</h1>
+        <p class="hero-sub">
+            Upload lecture notes, diagrams and tutorial videos. Powered by
+            Azure App Service, Cosmos DB and Blob Storage.
+        </p>
+        <div class="search-box">
+            <input id="searchInput" type="search" placeholder="Search by title or description..." />
+            <select id="moduleFilter">
+                <option value="">All modules</option>
+            </select>
+            <button id="searchBtn" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+</section>
+
+<!-- ============== MAIN ============== -->
+<main class="container">
+
+    <!-- VIEW: BROWSE / TRENDING -->
+    <section id="view-list">
+        <div class="view-header">
+            <h2 id="listTitle">Latest resources</h2>
+            <span id="listCount" class="muted"></span>
+        </div>
+        <div id="resourceGrid" class="grid">
+            <!-- Cards injected by JS -->
+        </div>
+        <div id="emptyState" class="empty hidden">
+            <p>No resources yet. Be the first to upload one!</p>
+            <button class="btn btn-primary" data-route="upload">Upload a resource</button>
+        </div>
+    </section>
+
+    <!-- VIEW: UPLOAD -->
+    <section id="view-upload" class="hidden">
+        <div class="view-header">
+            <h2>Upload a new resource</h2>
+        </div>
+        <form id="uploadForm" class="form-card">
+            <div class="form-row">
+                <label for="title">Title <span class="req">*</span></label>
+                <input id="title" name="title" required placeholder="e.g. Cloud Native Development - Week 6 Notes" />
+            </div>
+            <div class="form-row">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3" placeholder="What's in the file?"></textarea>
+            </div>
+            <div class="form-grid-2">
+                <div class="form-row">
+                    <label for="module">Module <span class="req">*</span></label>
+                    <input id="module" name="module" required placeholder="COM682" />
+                </div>
+                <div class="form-row">
+                    <label for="course">Course</label>
+                    <input id="course" name="course" placeholder="MSc Computer Science" />
+                </div>
+            </div>
+            <div class="form-grid-2">
+                <div class="form-row">
+                    <label for="university">University</label>
+                    <input id="university" name="university" placeholder="Ulster University" />
+                </div>
+                <div class="form-row">
+                    <label for="tags">Tags (comma-separated)</label>
+                    <input id="tags" name="tags" placeholder="azure, cosmos-db, lecture" />
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="file">File <span class="req">*</span></label>
+                <input id="file" name="file" type="file" required />
+                <small class="muted">PDF, DOCX, PPTX, images or video. Max 100 MB.</small>
+            </div>
+            <div class="form-row form-actions">
+                <button type="submit" class="btn btn-primary" id="uploadBtn">Upload</button>
+                <span id="uploadStatus" class="status"></span>
+            </div>
+        </form>
+    </section>
+
+    <!-- VIEW: RESOURCE DETAIL -->
+    <section id="view-detail" class="hidden">
+        <button class="btn btn-link" data-route="home">← Back to list</button>
+        <div id="detailContent"><!-- injected --></div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>GetNotes · Cloud Native Development (COM682) · Built on Microsoft Azure</p>
+        <p class="muted small">App Service · Cosmos DB · Blob Storage · Application Insights · GitHub Actions CI/CD</p>
+    </div>
+</footer>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
