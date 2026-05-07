@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: getnotes-web         # <-- change to your App Service name
+  AZURE_WEBAPP_NAME: getnotes-web-shafi
   AZURE_WEBAPP_PACKAGE_PATH: '.'
   NODE_VERSION: '20.x'
 
