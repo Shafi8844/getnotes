@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_NAME: getnotes-fn      # <-- change to your Function App name
+  AZURE_FUNCTIONAPP_NAME: getnotes-fn-shafi
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'functions'
   NODE_VERSION: '20.x'
 
