@@ -133,9 +133,11 @@ router.get('/trending', async (_req, res, next) => {
             query: `SELECT TOP 10 *
                     FROM c
                     WHERE c.ratingCount > 0
-                    ORDER BY c.avgRating DESC, c.views DESC`
+                    ORDER BY c.avgRating DESC`
         };
         const { resources } = await cosmos.container('resources').items.query(query).fetchAll();
+        // Secondary sort by views done in-process (avoids composite index requirement)
+        resources.sort((a, b) => (b.avgRating - a.avgRating) || (b.views - a.views));
         res.json({ count: resources.length, resources });
     } catch (err) {
         next(err);
