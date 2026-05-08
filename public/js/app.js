@@ -10,29 +10,35 @@
   const $$ = (s, ctx = document) => ctx.querySelectorAll(s);
 
   /* ============================================================
-     ENTRA ID AUTH — App Service Easy Auth (/.auth/* endpoints)
+     AUTH — JWT stored in localStorage
      ============================================================ */
-  let _currentUser = null; // { name, preferred_username }
+  const TOKEN_KEY = 'getnotes_token';
+  const USER_KEY  = 'getnotes_user';
 
-  async function initAuth() {
-    try {
-      const data = await fetch('/.auth/me', { credentials: 'include' }).then(r => r.json());
-      const principal = data?.clientPrincipal;
-      if (principal?.userDetails) {
-        _currentUser = {
-          name:               principal.name || principal.userDetails,
-          preferred_username: principal.userDetails
-        };
-      }
-    } catch {
-      // Not on App Service Easy Auth (local dev) — stay as guest
-    }
+  let _currentUser = JSON.parse(localStorage.getItem(USER_KEY) || 'null');
+  let _token       = localStorage.getItem(TOKEN_KEY) || null;
+
+  function saveSession(token, user) {
+    _token = token; _currentUser = user;
+    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  }
+
+  function clearSession() {
+    _token = null; _currentUser = null;
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+  }
+
+  function isSignedIn() { return !!_token && !!_currentUser; }
+
+  function initAuth() {
     renderAuthUi();
   }
 
   function renderAuthUi() {
-    if (_currentUser) {
-      const name = _currentUser.name || _currentUser.preferred_username || 'You';
+    if (isSignedIn()) {
+      const name = _currentUser.name || _currentUser.email || 'You';
       const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
       $('#userAvatar').textContent = initials;
       $('#userName').textContent   = name.split(' ')[0];
@@ -44,18 +50,97 @@
     }
   }
 
-  function signIn() {
-    // Easy Auth handles the full OAuth2 redirect flow
-    const returnTo = encodeURIComponent(window.location.href);
-    window.location.href = `/.auth/login/aad?post_login_redirect_uri=${returnTo}`;
+  /* ---- Auth modal ---- */
+  function openAuthModal(startTab = 'login') {
+    switchAuthTab(startTab);
+    $('#authModal').classList.remove('hidden');
+    (startTab === 'login' ? $('#loginEmail') : $('#regName')).focus();
   }
 
+  function closeAuthModal() {
+    $('#authModal').classList.add('hidden');
+    $('#loginForm').reset();
+    $('#registerForm').reset();
+  }
+
+  function switchAuthTab(tab) {
+    $$('.auth-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    $('#loginForm').classList.toggle('hidden', tab !== 'login');
+    $('#registerForm').classList.toggle('hidden', tab !== 'register');
+    $('#authModalTitle').textContent = tab === 'login' ? 'Sign in' : 'Create account';
+  }
+
+  function wireAuthModal() {
+    $('#authModalClose').addEventListener('click', closeAuthModal);
+    $('#authModal').addEventListener('click', e => { if (e.target === $('#authModal')) closeAuthModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAuthModal(); });
+
+    $$('.auth-tab').forEach(btn => {
+      btn.addEventListener('click', () => switchAuthTab(btn.dataset.tab));
+    });
+
+    // Login submit
+    $('#loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = $('#loginBtn');
+      btn.disabled = true; btn.textContent = 'Signing in…';
+      try {
+        const data = await fetch(API + '/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email:    $('#loginEmail').value.trim(),
+            password: $('#loginPassword').value
+          })
+        }).then(r => r.json());
+
+        if (data.error) throw new Error(data.error);
+        saveSession(data.token, data.user);
+        renderAuthUi();
+        closeAuthModal();
+        toast(`Welcome back, ${data.user.name.split(' ')[0]}!`, 'success');
+      } catch (err) {
+        toast(err.message, 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Sign in';
+      }
+    });
+
+    // Register submit
+    $('#registerForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = $('#registerBtn');
+      btn.disabled = true; btn.textContent = 'Creating account…';
+      try {
+        const data = await fetch(API + '/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name:     $('#regName').value.trim(),
+            email:    $('#regEmail').value.trim(),
+            password: $('#regPassword').value
+          })
+        }).then(r => r.json());
+
+        if (data.error) throw new Error(data.error);
+        saveSession(data.token, data.user);
+        renderAuthUi();
+        closeAuthModal();
+        toast(`Account created! Welcome, ${data.user.name.split(' ')[0]}!`, 'success');
+      } catch (err) {
+        toast(err.message, 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Create account';
+      }
+    });
+  }
+
+  function signIn()  { openAuthModal('login'); }
   function signOut() {
-    const returnTo = encodeURIComponent(window.location.origin);
-    window.location.href = `/.auth/logout?post_logout_redirect_uri=${returnTo}`;
+    clearSession();
+    renderAuthUi();
+    toast('Signed out.', 'info');
   }
-
-  function isSignedIn() { return !!_currentUser; }
 
   /* ============================================================
      HELPERS
@@ -114,21 +199,24 @@
   async function api(path, opts = {}) {
     const method = (opts.method || 'GET').toUpperCase();
 
-    // For write operations, ensure the user is signed in.
-    // Easy Auth session cookies are sent automatically (same-origin), so we
-    // only need to trigger the login redirect if the user isn't signed in yet.
-    if (WRITE_METHODS.has(method) && !isSignedIn()) {
-      toast('Please sign in with your Microsoft account to continue.', 'info');
-      signIn(); // redirects to /.auth/login/aad
-      return;
+    // Attach JWT for all write operations; prompt login if not signed in.
+    if (WRITE_METHODS.has(method)) {
+      if (!isSignedIn()) {
+        toast('Please sign in to continue.', 'info');
+        openAuthModal('login');
+        throw new Error('Not authenticated');
+      }
+      opts.headers = {
+        ...(opts.headers || {}),
+        'Authorization': `Bearer ${_token}`
+      };
     }
-
-    // Include credentials so the Easy Auth session cookie is sent
-    opts.credentials = 'include';
 
     const res = await fetch(API + path, opts);
     if (!res.ok) {
       const e = await res.json().catch(() => ({ error: res.statusText }));
+      // Token expired — clear session and prompt re-login
+      if (res.status === 401) { clearSession(); renderAuthUi(); }
       throw new Error(e.error || `HTTP ${res.status}`);
     }
     return res.status === 204 ? null : res.json();
@@ -587,7 +675,7 @@
       try {
         if (!isSignedIn()) {
           toast('Please sign in to upload resources.', 'info');
-          signIn();
+          openAuthModal('login');
           return;
         }
 
@@ -595,7 +683,8 @@
         fd.set('file', _selectedFile, _selectedFile.name);
 
         const res  = await fetch(API + '/resources', {
-          method: 'POST', body: fd, credentials: 'include'
+          method: 'POST', body: fd,
+          headers: { 'Authorization': `Bearer ${_token}` }
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
@@ -631,11 +720,11 @@
   /* ============================================================
      BOOT
      ============================================================ */
-  document.addEventListener('DOMContentLoaded', async () => {
+  document.addEventListener('DOMContentLoaded', () => {
     $('#btnSignIn').addEventListener('click', signIn);
     $('#btnSignOut').addEventListener('click', signOut);
-
-    await initAuth(); // must run before first authenticated action
+    wireAuthModal();
+    initAuth();
     wireNav();
     wireUpload();
     loadList(false);

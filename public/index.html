@@ -15,6 +15,53 @@
 <!-- ============== TOASTS ============== -->
 <div id="toastContainer" aria-live="polite" aria-atomic="false"></div>
 
+<!-- ============== AUTH MODAL ============== -->
+<div id="authModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="authModalTitle">Sign in</h3>
+      <button class="modal-close" id="authModalClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Tab switcher -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" data-tab="login">Sign in</button>
+        <button class="auth-tab" id="tabRegister" data-tab="register">Create account</button>
+      </div>
+
+      <!-- Login form -->
+      <form id="loginForm" class="auth-form">
+        <div class="form-row">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" placeholder="your@email.com" autocomplete="email" required />
+        </div>
+        <div class="form-row">
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Sign in</button>
+      </form>
+
+      <!-- Register form -->
+      <form id="registerForm" class="auth-form hidden">
+        <div class="form-row">
+          <label for="regName">Full name</label>
+          <input id="regName" type="text" placeholder="Jane Smith" autocomplete="name" required />
+        </div>
+        <div class="form-row">
+          <label for="regEmail">Email</label>
+          <input id="regEmail" type="email" placeholder="your@email.com" autocomplete="email" required />
+        </div>
+        <div class="form-row">
+          <label for="regPassword">Password <span class="muted">(min 6 chars)</span></label>
+          <input id="regPassword" type="password" placeholder="••••••••" autocomplete="new-password" required minlength="6" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="registerBtn">Create account</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- ============== EDIT MODAL ============== -->
 <div id="editModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal">

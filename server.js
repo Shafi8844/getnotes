@@ -19,6 +19,7 @@ const rateLimit = require('express-rate-limit');
 const resourcesRouter = require('./routes/resources');
 const interactionsRouter = require('./routes/interactions');
 const usersRouter = require('./routes/users');
+const authRouter = require('./routes/auth');
 const cosmos = require('./services/cosmosService');
 const blob = require('./services/blobService');
 
@@ -53,23 +54,6 @@ app.use('/api/', apiLimiter);
 // ----- Static frontend -----
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ----- Auth info — wraps Easy Auth principal for same-origin API callers -----
-app.get('/api/auth/me', (req, res) => {
-    const raw = req.headers['x-ms-client-principal'];
-    if (!raw) return res.json({ authenticated: false, user: null });
-    try {
-        const principal = JSON.parse(Buffer.from(raw, 'base64').toString('utf8'));
-        res.json({
-            authenticated: true,
-            user: {
-                name:     principal.name || principal.userDetails || '',
-                username: principal.userDetails || ''
-            }
-        });
-    } catch {
-        res.json({ authenticated: false, user: null });
-    }
-});
 
 // ----- Health probe (used by App Service + load balancers) -----
 app.get('/api/health', (_req, res) => {
@@ -83,6 +67,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 // ----- API routes -----
+app.use('/api/auth', authRouter);
 app.use('/api/resources', resourcesRouter);
 app.use('/api/interactions', interactionsRouter);
 app.use('/api/users', usersRouter);
