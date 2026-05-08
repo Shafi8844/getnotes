@@ -52,7 +52,9 @@ jobs:
           PORT: 0
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip . -x "*.git*" "node_modules/.cache/*" "functions/*" "docs/*" "*.md"
+        # Exclude node_modules — App Service Oryx installs them fresh on the
+        # server so there are no cross-platform binary mismatches.
+        run: zip -r release.zip . -x "*.git*" "node_modules/*" "functions/*" "docs/*" "*.md"
 
       - uses: actions/upload-artifact@v4
         with:
