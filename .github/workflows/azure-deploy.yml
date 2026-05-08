@@ -52,9 +52,10 @@ jobs:
           PORT: 0
 
       - name: Zip artifact for deployment
-        # Exclude node_modules — App Service Oryx installs them fresh on the
-        # server so there are no cross-platform binary mismatches.
-        run: zip -r release.zip . -x "*.git*" "node_modules/*" "functions/*" "docs/*" "*.md"
+        # Include node_modules so the server starts with no extra install step.
+        # SCM_DO_BUILD_DURING_DEPLOYMENT is disabled on the App Service so
+        # Oryx does not wipe and rebuild packages on arrival.
+        run: zip -r release.zip . -x "*.git*" "node_modules/.cache/*" "functions/*" "docs/*" "*.md"
 
       - uses: actions/upload-artifact@v4
         with:
