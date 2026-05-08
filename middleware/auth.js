@@ -35,9 +35,11 @@ function requireAuth(req, res, next) {
         return next();
     }
 
-    // In local dev (no App Service Easy Auth), allow through with a dev identity.
-    if (process.env.NODE_ENV !== 'production' && !process.env.REQUIRE_AUTH) {
-        req.user = { name: 'dev-user', preferred_username: 'dev@localhost' };
+    // Only enforce auth when Easy Auth is explicitly enabled via env var.
+    // Set EASY_AUTH_ENABLED=true in App Service settings after configuring
+    // the Microsoft identity provider in the Azure Portal.
+    if (process.env.EASY_AUTH_ENABLED !== 'true') {
+        req.user = { name: 'anonymous', preferred_username: 'anonymous' };
         return next();
     }
 
