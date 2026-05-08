@@ -53,6 +53,24 @@ app.use('/api/', apiLimiter);
 // ----- Static frontend -----
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ----- Auth info — wraps Easy Auth principal for same-origin API callers -----
+app.get('/api/auth/me', (req, res) => {
+    const raw = req.headers['x-ms-client-principal'];
+    if (!raw) return res.json({ authenticated: false, user: null });
+    try {
+        const principal = JSON.parse(Buffer.from(raw, 'base64').toString('utf8'));
+        res.json({
+            authenticated: true,
+            user: {
+                name:     principal.name || principal.userDetails || '',
+                username: principal.userDetails || ''
+            }
+        });
+    } catch {
+        res.json({ authenticated: false, user: null });
+    }
+});
+
 // ----- Health probe (used by App Service + load balancers) -----
 app.get('/api/health', (_req, res) => {
     res.json({

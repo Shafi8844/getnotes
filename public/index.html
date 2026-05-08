@@ -53,10 +53,23 @@
     <nav class="nav">
       <a href="#" data-route="home" class="nav-link active">Browse</a>
       <a href="#" data-route="trending" class="nav-link">Trending</a>
-      <a href="#" data-route="upload" class="nav-link nav-cta">
+      <a href="#" data-route="upload" class="nav-link nav-cta" id="navUploadLink">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
         Upload
       </a>
+
+      <!-- Auth area: shows sign-in button or user pill -->
+      <div class="nav-auth" id="navAuth">
+        <button class="btn btn-ghost btn-sm auth-signin" id="btnSignIn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Sign in
+        </button>
+        <div class="user-pill hidden" id="userPill">
+          <div class="user-avatar" id="userAvatar">?</div>
+          <span class="user-name" id="userName"></span>
+          <button class="btn btn-ghost btn-sm" id="btnSignOut">Sign out</button>
+        </div>
+      </div>
     </nav>
   </div>
 </header>

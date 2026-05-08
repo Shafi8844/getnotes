@@ -10,14 +10,15 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const cosmos = require('../services/cosmosService');
 const insights = require('../services/insights');
+const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
 // ===== POST a comment =====
-// body: { resourceId, userId, text }
-router.post('/comments', async (req, res, next) => {
+router.post('/comments', requireAuth, async (req, res, next) => {
     try {
-        const { resourceId, userId, text } = req.body;
+        const { resourceId, text } = req.body;
+        const userId = req.user?.preferred_username || req.user?.upn || req.user?.name || 'anonymous';
         if (!resourceId || !text) {
             return res.status(400).json({ error: 'resourceId and text are required.' });
         }
@@ -26,7 +27,7 @@ router.post('/comments', async (req, res, next) => {
             id: uuidv4(),
             type: 'comment',
             resourceId,
-            userId: userId || 'anonymous',
+            userId,
             text: String(text).trim().slice(0, 2000),
             createdAt: new Date().toISOString()
         };
@@ -56,10 +57,10 @@ router.get('/comments/:resourceId', async (req, res, next) => {
 });
 
 // ===== POST a rating (1-5) =====
-// body: { resourceId, userId, rating }
-router.post('/ratings', async (req, res, next) => {
+router.post('/ratings', requireAuth, async (req, res, next) => {
     try {
-        const { resourceId, userId, rating } = req.body;
+        const { resourceId, rating } = req.body;
+        const userId = req.user?.preferred_username || req.user?.upn || req.user?.name || 'anonymous';
         const r = Number(rating);
         if (!resourceId || !Number.isFinite(r) || r < 1 || r > 5) {
             return res.status(400).json({ error: 'resourceId and rating (1-5) required.' });
@@ -70,7 +71,7 @@ router.post('/ratings', async (req, res, next) => {
             id: uuidv4(),
             type: 'rating',
             resourceId,
-            userId: userId || 'anonymous',
+            userId,
             rating: r,
             createdAt: new Date().toISOString()
         };

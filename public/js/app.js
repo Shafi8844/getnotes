@@ -1,6 +1,6 @@
 /**
  * GetNotes — Modern SaaS frontend
- * Vanilla JS, no framework. Same-origin API calls.
+ * Vanilla JS, no framework. Same-origin API calls + MSAL Entra ID auth.
  */
 (() => {
   'use strict';
@@ -8,6 +8,54 @@
   const API = '/api';
   const $ = (s, ctx = document) => ctx.querySelector(s);
   const $$ = (s, ctx = document) => ctx.querySelectorAll(s);
+
+  /* ============================================================
+     ENTRA ID AUTH — App Service Easy Auth (/.auth/* endpoints)
+     ============================================================ */
+  let _currentUser = null; // { name, preferred_username }
+
+  async function initAuth() {
+    try {
+      const data = await fetch('/.auth/me', { credentials: 'include' }).then(r => r.json());
+      const principal = data?.clientPrincipal;
+      if (principal?.userDetails) {
+        _currentUser = {
+          name:               principal.name || principal.userDetails,
+          preferred_username: principal.userDetails
+        };
+      }
+    } catch {
+      // Not on App Service Easy Auth (local dev) — stay as guest
+    }
+    renderAuthUi();
+  }
+
+  function renderAuthUi() {
+    if (_currentUser) {
+      const name = _currentUser.name || _currentUser.preferred_username || 'You';
+      const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      $('#userAvatar').textContent = initials;
+      $('#userName').textContent   = name.split(' ')[0];
+      $('#userPill').classList.remove('hidden');
+      $('#btnSignIn').classList.add('hidden');
+    } else {
+      $('#userPill').classList.add('hidden');
+      $('#btnSignIn').classList.remove('hidden');
+    }
+  }
+
+  function signIn() {
+    // Easy Auth handles the full OAuth2 redirect flow
+    const returnTo = encodeURIComponent(window.location.href);
+    window.location.href = `/.auth/login/aad?post_login_redirect_uri=${returnTo}`;
+  }
+
+  function signOut() {
+    const returnTo = encodeURIComponent(window.location.origin);
+    window.location.href = `/.auth/logout?post_logout_redirect_uri=${returnTo}`;
+  }
+
+  function isSignedIn() { return !!_currentUser; }
 
   /* ============================================================
      HELPERS
@@ -61,7 +109,23 @@
     return [1,2,3,4,5].map(i => `<span style="color:${i <= full ? '#f59e0b' : '#d1d5db'}">★</span>`).join('');
   };
 
+  const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
   async function api(path, opts = {}) {
+    const method = (opts.method || 'GET').toUpperCase();
+
+    // For write operations, ensure the user is signed in.
+    // Easy Auth session cookies are sent automatically (same-origin), so we
+    // only need to trigger the login redirect if the user isn't signed in yet.
+    if (WRITE_METHODS.has(method) && !isSignedIn()) {
+      toast('Please sign in with your Microsoft account to continue.', 'info');
+      signIn(); // redirects to /.auth/login/aad
+      return;
+    }
+
+    // Include credentials so the Easy Auth session cookie is sent
+    opts.credentials = 'include';
+
     const res = await fetch(API + path, opts);
     if (!res.ok) {
       const e = await res.json().catch(() => ({ error: res.statusText }));
@@ -521,10 +585,18 @@
       uploadBtn.disabled = true;
 
       try {
+        if (!isSignedIn()) {
+          toast('Please sign in to upload resources.', 'info');
+          signIn();
+          return;
+        }
+
         const fd = new FormData(uploadForm);
         fd.set('file', _selectedFile, _selectedFile.name);
 
-        const res  = await fetch(API + '/resources', { method: 'POST', body: fd });
+        const res  = await fetch(API + '/resources', {
+          method: 'POST', body: fd, credentials: 'include'
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
 
@@ -559,7 +631,11 @@
   /* ============================================================
      BOOT
      ============================================================ */
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    $('#btnSignIn').addEventListener('click', signIn);
+    $('#btnSignOut').addEventListener('click', signOut);
+
+    await initAuth(); // must run before first authenticated action
     wireNav();
     wireUpload();
     loadList(false);

@@ -17,6 +17,8 @@ const cosmos = require('../services/cosmosService');
 const blob = require('../services/blobService');
 const insights = require('../services/insights');
 
+const { requireAuth } = require('../middleware/auth');
+
 const router = express.Router();
 
 // 100 MB max — covers PDF notes and short video clips, while protecting
@@ -36,7 +38,7 @@ const ALLOWED_TYPES = [
 ];
 
 // ===== POST /api/resources : CREATE =====
-router.post('/', upload.single('file'), async (req, res, next) => {
+router.post('/', requireAuth, upload.single('file'), async (req, res, next) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded (field name "file").' });
@@ -47,10 +49,12 @@ router.post('/', upload.single('file'), async (req, res, next) => {
             });
         }
 
-        const { title, description, module, course, university, tags, uploadedBy } = req.body;
+        const { title, description, module, course, university, tags } = req.body;
         if (!title || !module) {
             return res.status(400).json({ error: 'title and module are required.' });
         }
+        // Derive uploader identity from the validated Entra ID token.
+        const uploadedBy = req.user?.preferred_username || req.user?.upn || req.user?.name || 'anonymous';
 
         // 1. Upload to Blob Storage first; if that fails, no DB row is created.
         const uploaded = await blob.uploadFile(
@@ -171,7 +175,7 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // ===== PUT /api/resources/:id : UPDATE METADATA =====
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', requireAuth, async (req, res, next) => {
     try {
         // Find first to get the partition key (module).
         const find = {
@@ -207,7 +211,7 @@ router.put('/:id', async (req, res, next) => {
 });
 
 // ===== DELETE /api/resources/:id =====
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', requireAuth, async (req, res, next) => {
     try {
         const find = {
             query: 'SELECT * FROM c WHERE c.id = @id',

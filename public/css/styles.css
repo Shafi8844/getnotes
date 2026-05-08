@@ -181,6 +181,29 @@ img, video { display: block; max-width: 100%; }
 }
 .nav-cta:hover { background: var(--primary-hover) !important; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,0.4); }
 
+/* Auth area */
+.nav-auth { display: flex; align-items: center; margin-left: 12px; }
+.auth-signin {
+  display: flex; align-items: center; gap: 6px;
+  border: 1px solid var(--border) !important;
+  color: var(--text-2) !important;
+  font-size: 0.8125rem;
+}
+.auth-signin:hover { border-color: var(--primary) !important; color: var(--primary) !important; }
+.user-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px 4px 4px;
+}
+.user-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: white; font-weight: 700; font-size: 0.75rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; text-transform: uppercase;
+}
+.user-name { font-size: 0.8125rem; font-weight: 500; color: var(--text); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* ============================================================
    HERO
    ============================================================ */
